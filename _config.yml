@@ -114,7 +114,7 @@ analytics:
 # Site Author
 author:
   name             : "CoderistaJong"
-  avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
+  avatar           : "/assets/images/coffee-lover.jpg"
   bio              : "I'm a steady learner."
   location         : "Seoul, South Korea"
   email            :
