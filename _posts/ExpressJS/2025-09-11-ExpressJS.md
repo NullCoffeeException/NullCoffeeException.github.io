@@ -6,7 +6,7 @@
 
 ---
 
-## 기본 설치
+## 기본 설치 & 세팅
 
 ① 먼저 Node.js와 VSCode가 설치되어 있어야 한다. (Node.js는 LTS 버전으로 다운받으면 된다.)
 
@@ -35,3 +35,102 @@ npm install -D nodemon
 &nbsp;(선택) nodemon을 설치한다. **nodemon은 서버를 개발할 때 코드가 바뀔 때마다 서버를 자동으로 재시작해주는 툴**이다. `node`로 실행하게 된다면 코드 변경 시마다 서버를 수동으로 재시작해줘야 하지만, `nodemon`으로 실행하면 이러한 불편함이 사라진다.
 
 &nbsp;**-D**는 패키지를 설치할 때 **개발 전용 패키지로 설치하는 옵션**이다. 이 옵션으로 설치한 패키지는 배포되는 파일에는 포함되지 않는다. 
+
+```json
+"scripts": {
+    "dev": "nodemon server.js"
+  }
+```
+
+&nbsp;nodemon을 -D로 설치할 경우, **package.json의 scripts 부분에 `"dev": "nodemon server.js"` 부분을 추가**해줘야 한다. 이는 nodemon을 개발 환경으로만 설치했기 때문에 터미널에서 nodemon 명령어를 쓸 수 없기 때문이다.
+
+&nbsp;위와 같이 추가를 해 놓았다면 이후 터미널에서 `npm run dev`로 서버를 실행시킬 수 있다.
+
+④ server.js 파일을 작성한다.
+
+```javascript
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+app.get('/', (req, res) => {
+    res.send('hello');
+});
+
+app.listen(5000, () => {
+    console.log('서버 실행중');
+});
+```
+
+&nbsp;위의 코드는 가장 기본적인 ExpressJS 서버의 예제이다. **require() 함수는 npm으로 설치한 라이브러리를 불러올 때** 사용한다. 따라서 위의 두 줄은 **express 모듈을 불러와서 app 객체를 생성**하는 것으로, `app`은 서버 전체를 대표하는 인스턴스가 된다.
+
+&nbsp;**app.use()는 미들웨어를 설정**한다. 미들웨어란 요청과 응답 사이에 실행되는 함수를 말한다. 위의 코드에서는 `express.json()`으로 Express의 내장 미들웨어를 등록하는데, 이를 통해 들어오는 요청의 body를 json으로 파싱해 준다. 이 결과는 `req`에 반영된다.
+
+&nbsp;**app.get()**은 HTTP의 **GET 요청을 처리**하는 라우터를 등록한다. 첫 번째 파라미터는 이 라우터가 처리할 URL 경로이고, 두 번째 파라미터는 요청이 들어왔을 때 실행할 콜백 함수이다. 콜백 함수의 파라미터인 `req`와 `res`는 각각 요청 객체와 응답 객체를 나타낸다.
+
+&nbsp;**app.listen()**은 서버를 특정 포트에서 **실행**시킨다. 첫 번째 파라미터가 포트 번호이고, 두 번째 파라미터는 함수 실행 시 실행될 콜백 함수이다.
+
+&nbsp;get()과 listen()은 순서에 상관없이 동작하지만, 일반적으로는 서버를 실행시키는 listen() 함수를 가장 마지막에 쓰는 것이 관례이다.
+
+⑤ 서버를 실행하고 접속한다.
+
+```cmd
+npm run dev
+```
+
+&nbsp;터미널에 `npm run dev`를 입력하면 package.json에 적혀진 스크립트에 따라 `nodemon server.js`가 실행된다.
+
+&nbsp;이후 `http://localhost:(포트번호)` 로 접속하면 서버와 응답할 수 있다.
+
+
+
+---
+
+### 라우팅
+
+```js
+app.get('/store', (req, res) => {
+    res.send('스토어');
+})
+```
+
+&nbsp;위와 같이 get()으로 받는 URL을 설정함으로써 해당 URL으로 들어오는 GET 요청을 처리할 수 있다. 이 방법으로 라우팅 기능을 구현할 수 있다.
+
+
+
+```javascript
+app.get('/', function(req, res) {
+  res.sendFile(__dirname + '/index.html')
+})
+```
+
+&nbsp;sendFile()은 파일을 전송하는 함수이다. 위의 코드에서 `__dirname`은 Node.js에서 정해져 있는 전역변수로 현재 파일의 디렉토리 경로를 나타낸다. 즉, 위의 코드는 sendFile() 안에 전송할 파일의 경로를 넣어 주는 코드이다.
+
+&nbsp;위의 코드를 통해 html 파일을 전송하도록 하면 페이지를 구현할 수 있다.
+
+
+
+
+
+---
+
+## 요청과 응답
+
+(다시 정리할 것.)
+
+웹 서버와 WAS는 API를 사용해 통신을 한다. 이때 웹 서버는 http 방식으로 WAS와 통신을 하는데, 가장 중요한 다섯 가지 메소드는 get, post, put, patch, delete이다.
+
+이를 백엔드에서 받게 된다면, get이나 post 등 여러 요청은 `app.get()`, `app.post()` 등 app에 연결된 형태로 받게 된다. 이를 통해 어떤 응답을 할 지를 설계할 수 있는데, 이것이 API를 설계하는 과정이다.
+
+참고로 get이든 post이든 백엔드에서는 동일하게 받아들인다. 메서드는 단지 라벨에 불과하고, 어떤 동작을 할 지는 API를 어떻게 설계하느냐에 달려 있다. 하지만 물론 메서드와 전혀 관련 없는 로직을 설계했다가는 REST API의 원칙을 위반하는 것이 되기 때문에 그냥 관례를 지키는 것이 좋다.
+
+백엔드에서의 응답은 반드시 `res`를 통해서 이루어진다.
+
+인증, 인가 등의 기능은 `req` 안의 정보를 이용한다. 클라이언트가 보내는 정보의 모든 것은 `req` 안에 들어 있다.
+
+
+
+---
+
+좋은 REST API의 설계 원칙에는 6가지가 있다.
